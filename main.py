@@ -23,14 +23,15 @@ class MainWindow(QMainWindow):
 
         about_action = QAction("About", self)
         help_menu_item.addAction(about_action)
+        about_action.triggered.connect(self.about)
 
         search_action = QAction(QIcon("icons/search.png"), "Search", self)
         edit_menu_item.addAction(search_action)
         search_action.triggered.connect(self.search)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(("ID", "Name", "Course", "Mobile"))
+        self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(("ID", "Name", "Course", "Mobile", "Age"))
         self.table.verticalHeader().setVisible(False)
         self.setCentralWidget(self.table)
 
@@ -88,6 +89,28 @@ class MainWindow(QMainWindow):
         dialog = DeleteDialog()
         dialog.exec()
 
+    def about(self):
+        dialog = AboutDialog()
+        dialog.exec()
+
+
+class AboutDialog(QMessageBox):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("About")
+        content = """
+        This app was created to showcase a simple GUI that stores student data. 
+        
+        Functionalities includes adding students, editing existing data, 
+        and removing students. 
+        
+        Data would be displayed in a table, linked to a sqlite database,  
+        with search capability. 
+        
+        Feel free to modify and try this app!
+        """
+        self.setText(content)
+
 
 class EditDialog(QDialog):
     def __init__(self):
@@ -113,7 +136,7 @@ class EditDialog(QDialog):
         # Add Combo Box of Courses
         selcourse_name = student_records.table.item(index, 2).text()
         self.course_name = QComboBox()
-        courses = ["Biology", "Math", "Physics"]
+        courses = ["Beginner, Intermediate, Advance"]
         self.course_name.addItems(courses)
         self.course_name.setCurrentText(selcourse_name)
         layout.addWidget(self.course_name)
@@ -123,6 +146,12 @@ class EditDialog(QDialog):
         self.mobile = QLineEdit(selmobile)
         self.mobile.setPlaceholderText("Mobile Number")
         layout.addWidget(self.mobile)
+
+        # Add Age
+        selage = student_records.table.item(index, 4).text()
+        self.age = QLineEdit(selage)
+        self.age.setPlaceholderText("Age")
+        layout.addWidget(self.age)
 
         # Add submit button
         button = QPushButton("Update")
@@ -134,10 +163,10 @@ class EditDialog(QDialog):
     def update_student(self):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute("UPDATE students SET name = ?, course = ?, mobile = ? WHERE ID = ?",
+        cursor.execute("UPDATE students SET name = ?, course = ?, mobile = ?, age = ? WHERE ID = ?",
                        (self.student_name.text(),
                         self.course_name.itemText(self.course_name.currentIndex()),
-                        self.mobile.text(), self.student_id))
+                        self.mobile.text(), self.age.text(), self.student_id))
         connection.commit()
         cursor.close()
         connection.close()
@@ -206,7 +235,7 @@ class InsertDialog(QDialog):
 
         # Add Combo Box of Courses
         self.course_name = QComboBox()
-        courses = ["Biology", "Math", "Physics"]
+        courses = ["Beginner", "Intermediate", "Advance"]
         self.course_name.addItems(courses)
         layout.addWidget(self.course_name)
 
@@ -214,6 +243,11 @@ class InsertDialog(QDialog):
         self.mobile = QLineEdit()
         self.mobile.setPlaceholderText("Mobile Number")
         layout.addWidget(self.mobile)
+
+        # Add Age Widget
+        self.age = QLineEdit()
+        self.age.setPlaceholderText("Age")
+        layout.addWidget(self.age)
 
         # Add submit button
         button = QPushButton("Register")
@@ -226,10 +260,11 @@ class InsertDialog(QDialog):
         name = self.student_name.text()
         course = self.course_name.itemText(self.course_name.currentIndex())
         mobile = self.mobile.text()
+        age = self.age.text()
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO students (name, course, mobile) VALUES (?, ?, ?)",
-                       (name, course, mobile))
+        cursor.execute("INSERT INTO students (name, course, mobile, age) VALUES (?, ?, ?, ?)",
+                       (name, course, mobile, age))
         connection.commit()
         cursor.close()
         connection.close()
