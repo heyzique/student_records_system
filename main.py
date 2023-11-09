@@ -144,6 +144,13 @@ class EditDialog(QDialog):
         # Refresh the table
         student_records.load_data()
 
+        self.close()
+
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("Done")
+        confirmation_widget.setText("The record was updated successfully!")
+        confirmation_widget.exec()
+
 
 class DeleteDialog(QDialog):
     def __init__(self):
@@ -228,6 +235,13 @@ class InsertDialog(QDialog):
         connection.close()
         student_records.load_data()
 
+        self.close()
+
+        confirmation_widget = QMessageBox()
+        confirmation_widget.setWindowTitle("New Student")
+        confirmation_widget.setText("The student was added successfully!")
+        confirmation_widget.exec()
+
 
 class SearchDialog(QDialog):
     def __init__(self):
@@ -264,6 +278,7 @@ class SearchDialog(QDialog):
 
         cursor.close()
         connection.close()
+        self.close()
 
 
 app = QApplication(sys.argv)
